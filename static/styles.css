@@ -1,0 +1,130 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #1a2a3a, #0f1923);
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px; /* Increased from 600px to 800px */
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.upload-section {
+    background: linear-gradient(45deg, #2c3e50, #34495e);
+    padding: 30px;
+    text-align: center;
+    border-bottom: 2px solid #4a5568;
+}
+
+.upload-section h1 {
+    color: #eccc68;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-section h1 i {
+    margin-right: 10px;
+    color: #eccc68;
+}
+
+.file-input-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.file-input-wrapper input[type="file"] {
+    position: absolute;
+    left: -9999px;
+}
+
+.file-input-wrapper .custom-file-upload {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #eccc68;
+    color: #2c3e50;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.file-input-wrapper .custom-file-upload:hover {
+    background: #ffd32a;
+    transform: scale(1.05);
+}
+
+.file-name {
+    color: #bdc3c7;
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.result-section {
+    padding: 20px;
+    background: rgba(45, 52, 54, 0.7);
+}
+
+.result-section h2 {
+    color: #eccc68;
+    border-bottom: 2px solid #4a5568;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.result-content {
+    background: rgba(35, 42, 44, 0.6);
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 150px; /* Added to ensure consistent height */
+    color: #e0e0e0;
+    word-wrap: break-word; /* Ensures long text breaks */
+    overflow-wrap: break-word; /* Alternate for word-wrap */
+    white-space: pre-wrap; /* Preserves formatting */
+}
+
+#extracted-text, #chatbot-response {
+    overflow: visible; /* Removed scrolling */
+    max-height: none; /* Removed max-height restriction */
+}
+
+#upload-form button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#upload-form button:hover {
+    background: #45a049;
+    transform: scale(1.05);
+}
+
+@media (max-width: 600px) {
+    .container {
+        width: 95%;
+        margin: 10px;
+    }
+}

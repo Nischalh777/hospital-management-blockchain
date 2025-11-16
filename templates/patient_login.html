@@ -1,0 +1,26 @@
+<!-- templates/patient_login.html -->
+{% extends "base.html" %}
+{% block title %}Patient Login{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="text-center mb-4">
+        <h2><i class="fas fa-user-shield me-2"></i>Patient Login</h2>
+    </div>
+    <form method="post" action="{{ url_for('patient_login') }}">
+        <div class="mb-3">
+            <label for="identifier" class="form-label">Email or Phone Number</label>
+            <input type="text" class="form-control" id="identifier" name="identifier" required>
+        </div>
+        <div class="mb-3">
+            <label for="dob" class="form-label">Date of Birth</label>
+            <input type="date" class="form-control" id="dob" name="dob" required>
+            <div class="form-text">Use your date of birth to log in.</div>
+        </div>
+        <div class="d-grid gap-2 mt-4">
+            <button type="submit" class="btn btn-success">Login</button>
+            <a href="{{ url_for('patient_register') }}" class="btn btn-outline-secondary">New Patient? Register</a>
+            <a href="{{ url_for('hospital_selection') }}" class="btn btn-outline-dark mt-2">Back to Selection</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

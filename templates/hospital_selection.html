@@ -1,0 +1,71 @@
+<!-- templates/hospital_selection.html -->
+{% extends "base.html" %}
+{% block title %}Select Your Hospital{% endblock %}
+
+{% block content %}
+<div class="selection-container">
+    <div class="text-center mb-5">
+        <h1 class="display-5">Hospital Management System</h1>
+        <p class="lead text-muted">Please select your hospital to proceed.</p>
+    </div>
+
+    <!-- Hospital List and Management -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-dark text-white">
+            <i class="fas fa-hospital me-2"></i>Hospitals
+        </div>
+        <div class="card-body">
+            {% if hospitals %}
+                <div class="list-group">
+                    {% for hospital in hospitals %}
+                        <a href="#" class="list-group-item list-group-item-action disabled">
+                            <strong>{{ hospital.name }}</strong> - {{ hospital.address }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-center text-muted">No hospitals are registered yet.</p>
+            {% endif %}
+            <hr>
+            <div class="d-flex justify-content-center gap-3">
+                 <a href="{{ url_for('hospital_login') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-sign-in-alt me-1"></i> Hospital Login
+                </a>
+                <a href="{{ url_for('hospital_register') }}" class="btn btn-secondary">
+                    <i class="fas fa-plus-circle me-1"></i> Register a New Hospital
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Login Options -->
+    <div class="row">
+        <!-- Doctor Login -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-user-md me-2"></i>For Doctors
+                </div>
+                <div class="card-body text-center d-grid">
+                    <p class="text-muted">Access your dashboard to manage patients.</p>
+                    <a href="{{ url_for('doctor_login') }}" class="btn btn-primary btn-lg">Doctor Login</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Login -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-user-plus me-2"></i>For Patients
+                </div>
+                <div class="card-body text-center d-grid gap-3">
+                    <p class="text-muted">Access your medical records and history.</p>
+                     <a href="{{ url_for('patient_login') }}" class="btn btn-success btn-lg">Patient Login</a>
+                     <a href="{{ url_for('patient_register') }}" class="btn btn-outline-success">New Patient? Register Here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

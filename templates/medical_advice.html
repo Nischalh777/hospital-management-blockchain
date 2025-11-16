@@ -1,0 +1,117 @@
+<!-- templates/medical_advice.html -->
+{% extends "base.html" %}
+{% block title %}Medical Report Analyzer{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="text-center mb-4">
+        <h2><i class="fas fa-file-medical-alt me-2"></i>Medical Report Analyzer</h2>
+        <p class="text-muted">Upload a medical document (Image or PDF) to get a simple summary and advice.</p>
+    </div>
+
+    <!-- Upload Form -->
+    <form id="upload-form" class="mb-4">
+        <div class="input-group">
+            <input type="file" class="form-control" name="file" id="file-input" required accept=".png,.jpg,.jpeg,.pdf">
+            <button class="btn btn-primary" type="submit" id="upload-button">
+                <i class="fas fa-cloud-upload-alt me-2"></i>Analyze
+            </button>
+        </div>
+        <div class="form-text mt-2">Selected file: <span id="file-name" class="text-muted">None</span></div>
+    </form>
+
+    <!-- Result Section -->
+    <div id="result-section">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-magic me-2"></i>Analysis Report</h5>
+            </div>
+            <div class="card-body">
+                <!-- 1. Loading Spinner (shown during analysis) -->
+                <div class="text-center" id="analysis-spinner" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Analyzing your document, please wait...</p>
+                </div>
+
+                <!-- 2. Chatbot Response (populated after analysis) -->
+                <div id="chatbot-response">
+                    <p class="text-center text-muted">Your analysis will appear here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadForm = document.getElementById('upload-form');
+    const fileInput = document.getElementById('file-input');
+    const fileNameSpan = document.getElementById('file-name');
+    const chatbotResponseDiv = document.getElementById('chatbot-response');
+    const spinner = document.getElementById('analysis-spinner');
+    const uploadButton = document.getElementById('upload-button');
+
+    // Update the file name display when a file is chosen
+    fileInput.addEventListener('change', function() {
+        const fileName = this.value.split('\\').pop();
+        fileNameSpan.textContent = fileName || 'None';
+    });
+
+    // Handle form submission
+    uploadForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        // --- 1. Prepare for analysis ---
+        // Clear previous results and show the spinner
+        chatbotResponseDiv.innerHTML = '';
+        spinner.style.display = 'block';
+        
+        // Disable the button to prevent multiple submissions
+        uploadButton.disabled = true;
+        uploadButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Analyzing...';
+
+        const formData = new FormData(this);
+
+        try {
+            // This fetch call still goes to your existing '/upload' route
+            const response = await fetch("{{ url_for('upload_file') }}", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // The backend sends back a JSON with a 'response' key. We use that.
+            if (data.error) {
+                chatbotResponseDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+            } else if (data.response) {
+                // --- 2. Render the AI's Markdown response as clean HTML ---
+                // We use the 'marked' library that is loaded in base.html
+                chatbotResponseDiv.innerHTML = marked.parse(data.response);
+            } else {
+                 chatbotResponseDiv.innerHTML = `<div class="alert alert-warning">No response was received from the analyzer.</div>`;
+            }
+
+        } catch (error) {
+            console.error('Fetch Error:', error);
+            chatbotResponseDiv.innerHTML = `<div class="alert alert-danger">An error occurred while uploading. Please check the file and try again.</div>`;
+        } finally {
+            // --- 3. Clean up after analysis ---
+            // Hide the spinner
+            spinner.style.display = 'none';
+            // Re-enable the button
+            uploadButton.disabled = false;
+            uploadButton.innerHTML = '<i class="fas fa-cloud-upload-alt me-2"></i>Analyze';
+        }
+    });
+});
+</script>
+{% endblock %}

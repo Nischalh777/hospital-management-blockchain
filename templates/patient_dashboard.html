@@ -1,0 +1,318 @@
+<!-- templates/patient_dashboard.html -->
+{% extends "base.html" %}
+{% block title %}Patient Dashboard{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Patient Dashboard</h1>
+            <p class="lead">Welcome, {{ patient.name }} ({{ profile.profile_name }})</p>
+        </div>
+        <div class="btn-group">
+            <a href="{{ url_for('select_profile') }}" class="btn btn-outline-primary">Switch Profile</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Logout</a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Left Column: Profile Info -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-user-circle me-2"></i>Profile Information</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Name:</strong> {{ patient.name }}</li>
+                    <li class="list-group-item"><strong>Phone:</strong> {{ patient.phone }}</li>
+                    <li class="list-group-item"><strong>Email:</strong> {{ patient.email or 'Not provided' }}</li>
+                    <li class="list-group-item"><strong>Date of Birth:</strong> {{ profile.date_of_birth.strftime('%d %B %Y') if profile.date_of_birth else 'N/A' }}</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Right Column: Uploads and Documents -->
+        <div class="col-md-8">
+            
+            <!-- === NEW UPLOAD SECTION WITH BLOCKCHAIN === -->
+            {% if has_recent_appointment %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-upload me-2"></i>Upload New Document</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text text-muted">You can upload documents for 3 days following your appointment.</p>
+                        <form action="{{ url_for('upload_document') }}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="document_type" class="form-label">Document Type</label>
+                                <select class="form-select" id="document_type" name="document_type" required>
+                                    <option value="Prescription">Prescription</option>
+                                    <option value="Report">Medical Report</option>
+                                    <option value="X-Ray">X-Ray / Scan</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="document" class="form-label">Select File</label>
+                                <input class="form-control" type="file" id="document" name="document" required>
+                                <div class="form-text">Allowed types: png, jpg, jpeg, gif, pdf, docx. Max size: 16 MB.</div>
+                            </div>
+                            
+                            <!-- BLOCKCHAIN OPTIONS -->
+                            <div class="mb-3 p-3 bg-light rounded">
+                                <h6 class="mb-3"><i class="fas fa-link me-2"></i>Blockchain Storage Options</h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="use_blockchain" value="true" id="use_blockchain">
+                                    <label class="form-check-label" for="use_blockchain">
+                                        <strong>Store on Blockchain (IPFS + Polygon)</strong>
+                                        <br><small class="text-muted">Decentralized storage with blockchain verification</small>
+                                    </label>
+                                </div>
+                                <div class="form-check" id="encrypt-option" style="display:none;">
+                                    <input class="form-check-input" type="checkbox" name="encrypt" value="true" id="encrypt">
+                                    <label class="form-check-label" for="encrypt">
+                                        <strong><i class="fas fa-lock me-1"></i>Encrypt Document</strong>
+                                        <br><small class="text-muted">Recommended for sensitive medical records</small>
+                                    </label>
+                                </div>
+                                <div class="alert alert-info mt-3" id="blockchain-info" style="display:none;">
+                                    <small>
+                                        <strong>What happens:</strong>
+                                        <ul class="mb-0 mt-2">
+                                            <li>File stored on IPFS (decentralized)</li>
+                                            <li>Record saved on Polygon blockchain</li>
+                                            <li>Available for download in 2-3 minutes</li>
+                                        </ul>
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-cloud-upload-alt me-2"></i>Upload
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>You can upload documents for up to 3 days after a scheduled appointment.
+                </div>
+            {% endif %}
+            <!-- === END OF UPLOAD SECTION === -->
+
+            <!-- === DOCUMENT LIST WITH BLOCKCHAIN INFO === -->
+<div class="card">
+    <div class="card-header">
+        <h5><i class="fas fa-file-alt me-2"></i>Your Medical Documents</h5>
+    </div>
+    <div class="card-body">
+        {% if documents %}
+            <ul class="list-group list-group-flush">
+                {% for doc in documents %}
+                    <li class="list-group-item {% if doc.blockchain_enabled %}border-start border-success border-3{% endif %}">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-file-medical-alt me-2 text-primary"></i>
+                                    {{ doc.document_type }}
+                                    
+                                    <!-- BLOCKCHAIN BADGES -->
+                                    {% if doc.blockchain_enabled %}
+                                    <span class="badge bg-success ms-2">
+                                        <i class="fas fa-link"></i> Blockchain
+                                    </span>
+                                    {% endif %}
+                                    {% if doc.encrypted %}
+                                    <span class="badge bg-warning text-dark ms-1">
+                                        <i class="fas fa-lock"></i> Encrypted
+                                    </span>
+                                    {% endif %}
+                                </h6>
+                                <small class="text-muted d-block">
+                                    {% if doc.doctor_id %}
+                                        Uploaded by Dr. {{ doc.doctor.name }} on {{ doc.upload_date.strftime('%d %b %Y') }}
+                                    {% else %}
+                                        Uploaded by you on {{ doc.upload_date.strftime('%d %b %Y') }}
+                                    {% endif %}
+                                </small>
+                                
+                                <!-- BLOCKCHAIN INFO BUTTON -->
+                                {% if doc.blockchain_enabled %}
+                                <button type="button" class="btn btn-sm btn-outline-info mt-2 blockchain-info-btn" data-doc-id="{{ doc.id }}">
+                                    <i class="fas fa-info-circle"></i> View Blockchain Details
+                                </button>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- ACTION BUTTONS -->
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('view_document', doc_id=doc.id) }}" target="_blank" class="btn btn-sm btn-outline-primary" title="View Document">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('uploaded_file', filename=doc.filename) }}" download class="btn btn-sm btn-outline-secondary" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-info analyze-btn" data-doc-id="{{ doc.id }}" title="Analyze Document">
+                                    <i class="fas fa-magic"></i> Analyze
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-center text-muted">No documents found.</p>
+        {% endif %}
+    </div>
+</div>
+            <!-- === END OF DOCUMENT LIST === -->
+
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="analysisModal" tabindex="-1" aria-labelledby="analysisModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="analysisModalLabel"><i class="fas fa-magic me-2"></i>Document Analysis</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="analysisResultBody">
+        <!-- Loading spinner -->
+        <div class="text-center" id="analysisSpinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Analyzing document, please wait...</p>
+        </div>
+        <!-- Analysis result will be injected here -->
+        <div id="analysisText" style="white-space: pre-wrap;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const analysisModal = new bootstrap.Modal(document.getElementById('analysisModal'));
+    const analysisResultBody = document.getElementById('analysisResultBody');
+    const analysisSpinner = document.getElementById('analysisSpinner');
+    const analysisText = document.getElementById('analysisText');
+
+    // === BLOCKCHAIN UPLOAD OPTIONS TOGGLE ===
+    const blockchainCheckbox = document.getElementById('use_blockchain');
+    const encryptOption = document.getElementById('encrypt-option');
+    const blockchainInfo = document.getElementById('blockchain-info');
+    const encryptCheckbox = document.getElementById('encrypt');
+    
+    if (blockchainCheckbox) {
+        blockchainCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                encryptOption.style.display = 'block';
+                blockchainInfo.style.display = 'block';
+                encryptCheckbox.checked = true; // Auto-check encryption
+            } else {
+                encryptOption.style.display = 'none';
+                blockchainInfo.style.display = 'none';
+            }
+        });
+    }
+
+    // === BLOCKCHAIN INFO MODAL ===
+    document.querySelectorAll('.blockchain-info-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const docId = this.dataset.docId;
+            
+            fetch(`/document/${docId}/blockchain_info`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.blockchain_enabled) {
+                        const infoHtml = `
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title"><i class="fas fa-link me-2"></i>Blockchain Information</h5>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <td><strong>IPFS CID:</strong></td>
+                                            <td><code>${data.ipfs_cid}</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Transaction Hash:</strong></td>
+                                            <td><code>${data.chain_tx}</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Encrypted:</strong></td>
+                                            <td>${data.encrypted ? '<span class="badge bg-warning">🔒 Yes</span>' : '<span class="badge bg-secondary">No</span>'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Upload Date:</strong></td>
+                                            <td>${new Date(data.upload_date).toLocaleString()}</td>
+                                        </tr>
+                                    </table>
+                                    <div class="d-grid gap-2">
+                                        <a href="${data.ipfs_url}" target="_blank" class="btn btn-primary">
+                                            <i class="fas fa-external-link-alt me-2"></i>View on IPFS
+                                        </a>
+                                        <a href="${data.polygonscan_url}" target="_blank" class="btn btn-success">
+                                            <i class="fas fa-external-link-alt me-2"></i>View on Polygonscan
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Create and show modal
+                        const modalDiv = document.createElement('div');
+                        modalDiv.className = 'modal fade';
+                        modalDiv.innerHTML = `<div class="modal-dialog">${infoHtml}</div>`;
+                        document.body.appendChild(modalDiv);
+                        const modal = new bootstrap.Modal(modalDiv);
+                        modal.show();
+                        
+                        modalDiv.addEventListener('hidden.bs.modal', function() {
+                            modalDiv.remove();
+                        });
+                    }
+                })
+                .catch(error => {
+                    alert('Error fetching blockchain information: ' + error);
+                });
+        });
+    });
+
+    // === DOCUMENT ANALYSIS ===
+    document.querySelectorAll('.analyze-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const docId = this.dataset.docId;
+            
+            // Reset and show modal with spinner
+            analysisText.innerHTML = '';
+            analysisSpinner.style.display = 'block';
+            analysisModal.show();
+
+            fetch(`/analyze_document/${docId}`, {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(data => {
+                analysisSpinner.style.display = 'none';
+                if (data.error) {
+                    analysisText.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    analysisText.innerHTML = marked.parse(data.analysis);
+                }
+            })
+            .catch(error => {
+                analysisSpinner.style.display = 'none';
+                analysisText.innerHTML = `<div class="alert alert-danger">A network error occurred. Please try again.</div>`;
+                console.error('Error:', error);
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

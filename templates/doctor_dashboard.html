@@ -1,0 +1,72 @@
+<!-- templates/doctor_dashboard.html -->
+{% extends "base.html" %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Doctor Dashboard</h1>
+            <p class="lead">Welcome, Dr. {{ doctor.name }}</p>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Logout</a>
+    </div>
+    
+    <div class="row">
+        <!-- Doctor Info Column (unchanged) -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header"><h5>Doctor Information</h5></div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Name:</strong> {{ doctor.name }}</li>
+                    <li class="list-group-item"><strong>Email:</strong> {{ doctor.email }}</li>
+                    <li class="list-group-item"><strong>Specialization:</strong> {{ doctor.specialization }}</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- === APPOINTMENTS COLUMN (UPDATED) === -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-calendar-alt me-2"></i>Upcoming Appointments</h5>
+                </div>
+                <div class="card-body">
+                    {% if appointments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Patient Name</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <!-- In doctor_dashboard.html -->
+                                <tbody>
+                                    {% for appt in appointments %}
+                                    <tr>
+                                    <td>{{ appt.appointment_date.strftime('%d %b %Y') }}</td>
+                                    <td>{{ appt.appointment_time }}</td>
+                                                                    <td>
+                                            <!-- === THIS IS THE KEY CHANGE === -->
+                                            <a href="{{ url_for('view_patient_details', patient_id=appt.patient_id, appointment_id=appt.id) }}">
+                                                {{ appt.patient_name }}
+                                            </a>
+                                            <!-- === END OF CHANGE === -->
+                                        </td>
+                                        <td>{{ appt.reason_for_visit or 'N/A' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted">No upcoming appointments found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5 position-relative">
+    <!-- Back to Home Button - Top Right -->
+    <div class="position-absolute top-0 end-0 mt-3 me-3">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-home me-2"></i>Back to Home
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-primary">Hospital Management System</h1>
+                <p class="lead text-muted">Access our comprehensive healthcare services</p>
+                <hr class="my-4">
+            </div>
+            
+            <!-- Section 1: User Authentication -->
+            <div class="card shadow mb-4 border-primary border-top border-top-3">
+                <div class="card-header bg-primary text-white py-3">
+                    <h3 class="mb-0"><i class="fas fa-user-shield me-2"></i>User Authentication</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h4>Choose Login Type</h4>
+                        <p class="text-muted">Please select your role to access the system</p>
+                    </div>
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('doctor_login') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-md me-2"></i>Login as Doctor
+                        </a>
+                        <a href="{{ url_for('patient_login') }}" class="btn btn-success btn-lg">
+                            <i class="fas fa-user me-2"></i>Login as Patient
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <br>
+            <br>
+            <br>
+            
+            <!-- Section 2: Blood Donor Matching System -->
+            <div class="card shadow border-danger border-top border-top-3">
+                <div class="card-header bg-danger text-white py-3">
+                    <h3 class="mb-0"><i class="fas fa-tint me-2"></i>Blood Donor Matching System</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h4>Find Blood Donors</h4>
+                        <p class="text-muted">Match patients with compatible blood donors quickly</p>
+                    </div>
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('blood_donor.index') }}" class="btn btn-danger btn-lg">
+                            <i class="fas fa-tint me-2"></i>Access Blood Donor System
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

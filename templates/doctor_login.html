@@ -1,0 +1,25 @@
+<!-- templates/doctor_login.html -->
+{% extends "base.html" %}
+{% block title %}Doctor Login{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="logo">
+        <h2>Doctor Login</h2>
+    </div>
+    <form method="post" action="{{ url_for('doctor_login') }}">
+        <div class="mb-3">
+            <label for="identifier" class="form-label">Email or Phone Number</label>
+            <input type="text" class="form-control" id="identifier" name="identifier" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Login</button>
+            <a href="{{ url_for('doctor_register') }}" class="btn btn-outline-secondary">New Doctor? Register</a>
+            <a href="{{ url_for('hospital_selection') }}" class="btn btn-outline-secondary">Back</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

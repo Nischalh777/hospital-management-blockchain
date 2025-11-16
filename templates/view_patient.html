@@ -1,0 +1,219 @@
+<!-- templates/view_patient.html -->
+{% extends "base.html" %}
+{% block title %}View Patient Records{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Patient Record</h1>
+            <p class="lead">Viewing details for: <strong>{{ patient.name }}</strong></p>
+            <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Logout</a>
+    </div>
+
+    <!-- Patient Details -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-user-circle me-2"></i>Patient Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6"><strong>Name:</strong> {{ patient.name }}</div>
+                <div class="col-md-6"><strong>Phone:</strong> {{ patient.phone }}</div>
+                <div class="col-md-6"><strong>Email:</strong> {{ patient.email }}</div>
+                {% if patient.profiles[0].date_of_birth %}
+                <div class="col-md-6"><strong>Date of Birth:</strong> {{ patient.profiles[0].date_of_birth.strftime('%d %B %Y') }}</div>
+                {% endif %}
+            </div>
+            <hr>
+            <p><strong>Appointment on:</strong> {{ appointment.appointment_date.strftime('%d %b %Y') }} at {{ appointment.appointment_time }}</p>
+            <p><strong>Reason for Visit:</strong> {{ appointment.reason_for_visit or 'N/A' }}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Column 1: Add New Medical Record -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-notes-medical me-2"></i>Add Consultation Record</h5>
+                </div>
+                <div class="card-body">
+                    {% if appointment.medical_record %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-check-circle me-2"></i>A record for this consultation has already been added.
+                        </div>
+                        <h6><strong>Doctor's Notes:</strong></h6>
+                        <p style="white-space: pre-wrap;">{{ appointment.medical_record.notes }}</p>
+                        <h6><strong>Prescription:</strong></h6>
+                        <p style="white-space: pre-wrap;">{{ appointment.medical_record.prescription or 'None' }}</p>
+                    {% else %}
+                        <form action="{{ url_for('add_medical_record') }}" method="post">
+                            <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                            <input type="hidden" name="appointment_id" value="{{ appointment.id }}">
+                            
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">Diagnosis & Notes *</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="5" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="prescription" class="form-label">Prescription (if any)</label>
+                                <textarea class="form-control" id="prescription" name="prescription" rows="5" placeholder="e.g., Paracetamol 500mg - 1 tablet twice a day for 3 days"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Record
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 2: View Past Records -->
+        <div class="col-md-6">
+            <!-- Patient-Uploaded Documents with Blockchain Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-folder-open me-2"></i>Patient's Uploaded Documents</h5>
+                </div>
+                <div class="card-body">
+                    {% if past_documents %}
+                        <ul class="list-group list-group-flush">
+                            {% for doc in past_documents %}
+                            <li class="list-group-item {% if doc.blockchain_enabled %}border-start border-success border-3{% endif %}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div>
+                                            <i class="fas fa-file-alt me-2"></i>
+                                            <strong>{{ doc.document_type }}:</strong> {{ doc.filename.split('_', 2)[-1] }}
+                                        </div>
+                                        
+                                        <!-- BLOCKCHAIN BADGES -->
+                                        {% if doc.blockchain_enabled %}
+                                        <span class="badge bg-success ms-2">
+                                            <i class="fas fa-link"></i> Blockchain
+                                        </span>
+                                        {% endif %}
+                                        {% if doc.encrypted %}
+                                        <span class="badge bg-warning text-dark ms-1">
+                                            <i class="fas fa-lock"></i> Encrypted
+                                        </span>
+                                        {% endif %}
+                                        
+                                        <br>
+                                        <small class="text-muted">
+                                            Uploaded: {{ doc.upload_date.strftime('%d %b %Y') }}
+                                            {% if doc.doctor_id %}
+                                            by Dr. {{ doc.doctor.name }}
+                                            {% else %}
+                                            by Patient
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    
+                                    <!-- ACTION BUTTONS FOR DOCTORS -->
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('view_document', doc_id=doc.id) }}" target="_blank" class="btn btn-sm btn-outline-primary" title="View Document">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('uploaded_file', filename=doc.filename) }}" download class="btn btn-sm btn-outline-secondary" title="Download">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">This patient has not uploaded any documents.</p>
+                    {% endif %}
+                    
+                </div>
+            </div>
+            
+            <!-- === DOCTOR UPLOAD WITH BLOCKCHAIN === -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5><i class="fas fa-cloud-upload-alt me-2"></i>Upload for Patient</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('doctor_upload_for_patient') }}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                <div class="mb-3">
+                    <label for="doc_type_doctor" class="form-label">Document Type</label>
+                    <select class="form-select" id="doc_type_doctor" name="document_type" required>
+                        <option value="Prescription">Prescription</option>
+                        <option value="Lab Report">Lab Report</option>
+                        <option value="Scan Report">Scan Report</option>
+                        <option value="X-Ray">X-Ray</option>
+                        <option value="MRI">MRI</option>
+                        <option value="CT Scan">CT Scan</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="doc_doctor" class="form-label">Select File</label>
+                    <input class="form-control" type="file" id="doc_doctor" name="document" required>
+                </div>
+                
+                <!-- BLOCKCHAIN OPTIONS FOR DOCTORS -->
+                <div class="mb-3 p-3 bg-light rounded">
+                    <h6 class="mb-3"><i class="fas fa-link me-2"></i>Blockchain Storage</h6>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="use_blockchain" value="true" id="doctor_blockchain" checked>
+                        <label class="form-check-label" for="doctor_blockchain">
+                            <strong>Store on Blockchain</strong>
+                            <br><small class="text-muted">Recommended for official medical records</small>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="encrypt" value="true" id="doctor_encrypt" checked>
+                        <label class="form-check-label" for="doctor_encrypt">
+                            <strong><i class="fas fa-lock me-1"></i>Encrypt Document</strong>
+                            <br><small class="text-muted">Recommended for patient privacy</small>
+                        </label>
+                    </div>
+                    <div class="alert alert-info mt-3 mb-0">
+                        <small>
+                            <i class="fas fa-info-circle me-1"></i>
+                            Blockchain storage provides immutable audit trail and decentralized storage.
+                        </small>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-upload me-2"></i>Upload Document
+                </button>
+            </form>
+        </div>
+    </div>
+            <!-- Previous Consultation Records -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history me-2"></i>Past Consultation History</h5>
+                </div>
+                <div class="card-body">
+                     {% if past_medical_records %}
+                        {% for record in past_medical_records %}
+                            <div class="border-bottom mb-3 pb-2">
+                                <p>
+                                    <strong>Date:</strong> {{ record.record_date.strftime('%d %b %Y') }}
+                                    <br>
+                                    <strong>Consulting Doctor:</strong> Dr. {{ record.doctor.name }}
+                                </p>
+                                <p style="white-space: pre-wrap;"><strong>Notes:</strong> {{ record.notes }}</p>
+                            </div>
+                        {% endfor %}
+                     {% else %}
+                        <p class="text-muted">No previous consultation records found.</p>
+                     {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

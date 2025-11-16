@@ -1,0 +1,23 @@
+<!-- templates/select_profile.html -->
+{% extends "base.html" %}
+{% block title %}Select Profile{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="logo">
+        <h2>Select Profile</h2>
+    </div>
+    <div class="list-group mb-3">
+        {% for profile in profiles %}
+            <a href="{{ url_for('set_profile', profile_id=profile.id) }}" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ profile.profile_name }}</h5>
+                </div>
+                <p class="mb-1">Age: {{ profile.age or 'N/A' }} | Gender: {{ profile.gender or 'N/A' }}</p>
+            </a>
+        {% endfor %}
+    </div>
+    <div class="d-grid">
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Logout</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Consultation System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #55a5ea;
+            --secondary-color: #2c3e50;
+            --background-dark: #1a1a1a;
+            --text-light: #ffffff;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: rgba(17, 17, 17, 0.95);
+            padding: 1rem 5%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--text-light);
+        }
+
+        .logo i {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .home-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            background: rgba(85, 165, 234, 0.1);
+        }
+
+        .home-link:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .home-link i {
+            font-size: 1.2rem;
+        }
+
+        .home-link span {
+            font-weight: 500;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .consultation-form {
+            background: rgba(42, 42, 42, 0.95);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background: #333;
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(85, 165, 234, 0.2);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #3498db;
+        }
+
+        .next-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .next-btn:hover {
+            background: #3498db;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #2a2a2a;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .confirmation-icon {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .confirmation-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--success-color);
+        }
+
+        .confirmation-details {
+            margin-bottom: 1.5rem;
+            color: #ccc;
+        }
+
+        .close-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .close-btn:hover {
+            background: #3498db;
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .doctor-selection {
+            margin-top: 1.5rem;
+        }
+
+        .doctor-card {
+            background: rgba(51, 51, 51, 0.5);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .doctor-card:hover {
+            background: rgba(51, 51, 51, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .doctor-card.selected {
+            border-color: var(--primary-color);
+            background: rgba(85, 165, 234, 0.1);
+        }
+
+        .doctor-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .doctor-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+        }
+
+        .doctor-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .doctor-info p {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .steps-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #444;
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 5px;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .step-circle.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .step-circle.completed {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .step-connector {
+            height: 3px;
+            width: 40px;
+            background: #444;
+            margin-top: 15px;
+        }
+
+        .step-connector.active {
+            background: var(--primary-color);
+        }
+
+        .step-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 1rem;
+            }
+
+            .steps-indicator {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="#" class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <h1>AnoN Healthcare</h1>
+            </a>
+            <div class="nav-container">
+                <a href="{{ url_for('index') }}" class="home-link">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <form class="consultation-form" id="consultationForm">
+            <div class="form-header">
+                <h2><i class="fas fa-calendar-check"></i> Book In-Person Consultation</h2>
+                <p>Fill in your details to schedule an appointment</p>
+            </div>
+
+            <div class="steps-indicator">
+                <div class="step-circle active" id="step1Circle">1<span class="step-label">Hospital</span></div>
+                <div class="step-connector" id="connector1"></div>
+                <div class="step-circle" id="step2Circle">2<span class="step-label">Doctor</span></div>
+                <div class="step-connector" id="connector2"></div>
+                <div class="step-circle" id="step3Circle">3<span class="step-label">Appointment</span></div>
+            </div>
+
+            <!-- Step 1: Hospital Selection -->
+            <div class="form-step active" id="step1">
+                <div class="form-group full-width">
+                    <label for="hospital">Select Hospital *</label>
+                    <select id="hospital" required>
+                        <option value="">Select a hospital</option>
+                        <!-- Hospitals will be loaded here from Flask -->
+                        {% for hospital in hospitals %}
+                            <option value="{{ hospital.id }}">{{ hospital.name }} - {{ hospital.address }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="error-message">Please select a hospital</span>
+                </div>
+                <div class="form-group full-width">
+                    <button type="button" class="next-btn" id="toDoctorBtn">
+                        <i class="fas fa-arrow-right"></i> Next: Select Doctor
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Doctor Selection -->
+            <div class="form-step" id="step2">
+                <div class="form-group full-width">
+                    <label>Select Doctor *</label>
+                    <div class="doctor-selection" id="doctorContainer">
+                        <p class="text-muted">Please select a hospital first to see available doctors.</p>
+                    </div>
+                    <span class="error-message" id="doctorError">Please select a doctor</span>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><button type="button" class="submit-btn" id="backToHospitalBtn" style="background: #555;"><i class="fas fa-arrow-left"></i> Back</button></div>
+                    <div class="form-group"><button type="button" class="next-btn" id="toDetailsBtn"><i class="fas fa-arrow-right"></i> Next: Details</button></div>
+                </div>
+            </div>
+
+            <!-- Step 3: Patient Details and Schedule -->
+            <div class="form-step" id="step3">
+                <!-- This part of the HTML form remains the same -->
+                <div class="form-grid">
+                    <div class="form-group"><label for="firstName">First Name *</label><input type="text" id="firstName" required><span class="error-message">Please enter your first name</span></div>
+                    <div class="form-group"><label for="lastName">Last Name</label><input type="text" id="lastName"></div>
+                    <div class="form-group"><label for="email">Email Address *</label><input type="email" id="email" required><span class="error-message">Please enter a valid email</span></div>
+                     <div class="form-group">
+                        <label for="dob">Date of Birth *</label>
+                        <input type="date" id="dob" required>
+                        <span class="error-message">Please select your date of birth</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="aadhar">Aadhar Number (Optional)</label>
+                        <input type="text" id="aadhar" maxlength="12" pattern="\d{12}">
+                    </div>
+                    <div class="form-group"><label for="phone">Phone Number *</label><input type="tel" id="phone" required><span class="error-message">Please enter a valid phone number</span></div>
+                    <div class="form-group"><label for="date">Preferred Date *</label><input type="date" id="date" required><span class="error-message">Please select a date</span></div>
+                    <div class="form-group"><label for="time">Preferred Time *</label><select id="time" required><option value="">Select a time</option><option value="09:00 AM">09:00 AM</option><option value="10:00 AM">10:00 AM</option><option value="11:00 AM">11:00 AM</option><option value="02:00 PM">02:00 PM</option><option value="03:00 PM">03:00 PM</option><option value="04:00 PM">04:00 PM</option></select><span class="error-message">Please select a time</span></div>
+                    <div class="form-group full-width"><label for="reason">Reason for Visit</label><textarea id="reason" rows="3"></textarea></div>
+                    <div class="form-group"><button type="button" class="submit-btn" id="backToDoctorBtn" style="background: #555;"><i class="fas fa-arrow-left"></i> Back</button></div>
+                    <div class="form-group"><button type="submit" class="submit-btn"><i class="fas fa-calendar-check"></i> Book Appointment</button></div>
+                </div>
+            </div>
+        </form>
+    </main>
+
+ <!-- In inperson.html, update the confirmation modal -->
+<div class="modal" id="confirmationModal">
+    <div class="modal-content">
+        <i class="fas fa-check-circle confirmation-icon"></i>
+        <h2 class="confirmation-title">Appointment Booked!</h2>
+        <div class="confirmation-details">
+            <p>Your appointment has been successfully recorded.</p>
+            
+            <!-- This div will be shown by JavaScript only for new users -->
+            <div id="password-info" style="display: none;">
+                <hr>
+                <p><strong>A new account has been created for you.</strong></p>
+                <p>You can now log in using your **Phone/Email** and your **Date of Birth** as the password.</p>
+                <p><a href="{{ url_for('patient_login') }}" class="btn btn-sm btn-primary mt-2">Login Now</a></p>
+            </div>
+        </div>
+        <button class="close-btn" onclick="closeModal()">
+            <i class="fas fa-check"></i> Done
+        </button>
+    </div>
+</div>
+    <script>
+        // --- THIS SCRIPT IS COMPLETELY NEW ---
+        // DOM elements
+        const form = document.getElementById('consultationForm');
+        const modal = document.getElementById('confirmationModal');
+        const hospitalSelect = document.getElementById('hospital');
+        const doctorContainer = document.getElementById('doctorContainer');
+        const doctorError = document.getElementById('doctorError');
+
+        const steps = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3')];
+        const circles = [document.getElementById('step1Circle'), document.getElementById('step2Circle'), document.getElementById('step3Circle')];
+        const connectors = [document.getElementById('connector1'), document.getElementById('connector2')];
+
+        // Navigation buttons
+        const toDoctorBtn = document.getElementById('toDoctorBtn');
+        const toDetailsBtn = document.getElementById('toDetailsBtn');
+        const backToHospitalBtn = document.getElementById('backToHospitalBtn');
+        const backToDoctorBtn = document.getElementById('backToDoctorBtn');
+
+        let selectedDoctorId = null;
+
+        function closeModal() {
+            modal.style.display = 'none';
+            form.reset();
+            showStep(1);
+            selectedDoctorId = null;
+            doctorContainer.innerHTML = '<p class="text-muted">Please select a hospital first to see available doctors.</p>';
+        }
+
+        function showStep(stepNumber) {
+            steps.forEach(step => step.classList.remove('active'));
+            circles.forEach(circle => circle.classList.remove('active', 'completed'));
+            connectors.forEach(connector => connector.classList.remove('active'));
+
+            steps[stepNumber - 1].classList.add('active');
+            for (let i = 0; i < stepNumber; i++) {
+                circles[i].classList.add(i < stepNumber - 1 ? 'completed' : 'active');
+                if (i < stepNumber - 1) connectors[i].classList.add('active');
+            }
+        }
+
+        async function loadDoctors(hospitalId) {
+            doctorContainer.innerHTML = '<p>Loading doctors...</p>';
+            selectedDoctorId = null; // Reset selection
+
+            if (!hospitalId) {
+                doctorContainer.innerHTML = '<p class="text-muted">Please select a hospital first to see available doctors.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/doctors/${hospitalId}`);
+                const data = await response.json();
+                
+                doctorContainer.innerHTML = '';
+                if (data.doctors && data.doctors.length > 0) {
+                    data.doctors.forEach(doctor => {
+                        const doctorCard = document.createElement('div');
+                        doctorCard.className = 'doctor-card';
+                        doctorCard.dataset.doctorId = doctor.id;
+                        
+                        doctorCard.innerHTML = `
+                            <div class="doctor-header">
+                                <div class="doctor-avatar"><i class="fas fa-user-md"></i></div>
+                                <div class="doctor-info">
+                                    <h3>${doctor.name}</h3>
+                                    <p>${doctor.specialization}</p>
+                                </div>
+                            </div>`;
+                        
+                        doctorCard.addEventListener('click', () => {
+                            document.querySelectorAll('.doctor-card').forEach(card => card.classList.remove('selected'));
+                            doctorCard.classList.add('selected');
+                            selectedDoctorId = doctor.id;
+                            doctorError.style.display = 'none';
+                        });
+                        
+                        doctorContainer.appendChild(doctorCard);
+                    });
+                } else {
+                    doctorContainer.innerHTML = '<p>No doctors found for this hospital.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching doctors:', error);
+                doctorContainer.innerHTML = '<p style="color:var(--error-color);">Could not load doctors. Please try again.</p>';
+            }
+        }
+
+        // --- Event Listeners ---
+        hospitalSelect.addEventListener('change', () => {
+            const hospitalId = hospitalSelect.value;
+            loadDoctors(hospitalId);
+        });
+
+        toDoctorBtn.addEventListener('click', () => {
+            if (!hospitalSelect.value) {
+                hospitalSelect.nextElementSibling.style.display = 'block';
+                return;
+            }
+            hospitalSelect.nextElementSibling.style.display = 'none';
+            showStep(2);
+        });
+
+        toDetailsBtn.addEventListener('click', () => {
+            if (!selectedDoctorId) {
+                doctorError.style.display = 'block';
+                return;
+            }
+            showStep(3);
+        });
+
+        backToHospitalBtn.addEventListener('click', () => showStep(1));
+        backToDoctorBtn.addEventListener('click', () => showStep(2));
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validation for required fields
+            let isValid = true;
+            const requiredFields = ['firstName', 'phone', 'email', 'dob', 'date', 'time'];
+            requiredFields.forEach(id => {
+                const input = document.getElementById(id);
+                if (!input.value) {
+                    isValid = false;
+                    // Find the error message sibling or child
+                    const errorMessage = input.parentElement.querySelector('.error-message');
+                    if(errorMessage) errorMessage.style.display = 'block';
+                } else {
+                    const errorMessage = input.parentElement.querySelector('.error-message');
+                    if(errorMessage) errorMessage.style.display = 'none';
+                }
+            });
+
+            if (!isValid) return;
+
+            // Collect form data including new fields
+            const appointmentData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                dob: document.getElementById('dob').value,
+                aadhar: document.getElementById('aadhar').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                reason: document.getElementById('reason').value,
+                doctorId: selectedDoctorId
+            };
+            
+            try {
+                const response = await fetch('/book_appointment', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(appointmentData),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+    const passwordInfoDiv = document.getElementById('password-info');
+    
+    // --- THIS IS THE CORRECTED LOGIC ---
+    // Check the 'new_user' flag that the server now sends.
+    if (result.new_user) {
+        // If it's a new user, show the password info div.
+        passwordInfoDiv.style.display = 'block';
+    } else {
+        // If it's an existing user, make sure the div is hidden.
+        passwordInfoDiv.style.display = 'none';
+    }
+    
+    // Show the success modal in either case.
+    modal.style.display = 'flex';
+
+} else {
+    alert('Booking failed: ' + result.message);
+}
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

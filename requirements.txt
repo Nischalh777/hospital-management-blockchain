@@ -1,0 +1,33 @@
+# Web Framework
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+
+# Database
+PyMySQL==1.1.0
+SQLAlchemy==2.0.23
+
+# Blockchain & Web3
+web3==6.11.3
+eth-account==0.10.0
+
+# HTTP & Requests
+requests==2.31.0
+urllib3==2.1.0
+
+# HTML Parsing
+beautifulsoup4==4.12.2
+soupsieve==2.5
+
+# AI & Machine Learning
+google-generativeai==0.3.1
+
+# Image Processing
+Pillow==10.1.0
+pytesseract==0.3.10
+
+# Utilities
+python-dotenv==1.0.0
+Werkzeug==3.0.1
+
+# Security
+cryptography==41.0.7
