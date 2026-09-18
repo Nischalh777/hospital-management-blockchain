@@ -57,7 +57,7 @@ A comprehensive hospital management system featuring decentralized storage using
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/hospital-management-blockchain.git
+git clone https://github.com/Nischalh777/hospital-management-blockchain.git
 cd hospital-management-blockchain
 ```
 
